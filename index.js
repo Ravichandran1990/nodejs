@@ -1,2 +1,2 @@
 const {arr} = require('./users')
-console.log(arr);
+console.log(arr1);
