@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../include/head.ejs') %>
+<body>
+  
+    
+  <%- include('../include/nav.ejs') %>
+     <div id="econtainerItemData">  
+      <ul class="collection with-header">
+         <% if(items.length > 0) { %>
+         <% items.forEach(item => { %>
+            <li class="collection-item"><div >
+              <a href="/items/<%= item._id%>"><%= item.name %> <%= item.price %></a>
+              <a class="secondary-content">
+              
+              <i class="material-icons" id="deleteItemData" data-id="<%= item._id %>">delete</i>
+              <i class="material-icons modal-trigger"  href="#edit_item" data-id="<%= item._id %>">edit</i>
+            </a>
+            </div></li>            
+          <% })}else { %>
+            <li class="collection-item"><div>Not Found</div></li>
+           <% } %>
+         
+        </ul>
+      </div>
+        <!-- Modal Structure -->
+  <div id="edit_item" class="modal">
+    <div class="modal-content">
+      <h4>Edit Items</h4>
+      
+    </div>
+    <div class="modal-footer">
+      <div class="row">
+        <form class="col s12" id="edit_form" action="">
+          <div class="row">
+            <div class="input-field col s6">
+              <input placeholder="Name" id="name" name="name" type="text" class="validate">
+              <label for="name">Name</label>
+            </div>
+            <div class="input-field col s6">
+              <input id="price" name="price" type="text" class="validate">
+              <label for="price">Price</label>
+            </div>
+          </div>
+          <button class="waves-effect waves-light btn">Update</button>
+          </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems);
+   let updatedId;   
+    edit_form.onsubmit = async function(e) {
+      e.preventDefault();
+      const id = updatedId;
+      console.log("updated "+id);
+      const data = new FormData(edit_form);
+      console.log(data.entries());
+      // for (const iterator of data.entries()) {
+      //     console.log(iterator);
+      // }
+     const response = await fetch('/items/'+id, {
+        method: 'PUT',
+        body: new URLSearchParams(data),
+        headers: new Headers({
+          'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        })
+      });
+      await response.json();
+      edit_form.reset()
+      window.location.reload();
+    }
+
+    econtainerItemData.onclick = (e) => {
+      //e.preventDefault();
+      const textContent = e.target.textContent;
+      if(textContent === 'edit') {
+        console.log(e.target.dataset.id);
+        updatedId = e.target.dataset.id;
+      }else if(textContent === 'delete') {
+        deleteItem(e.target.dataset.id);
+      } 
+      
+    }
+     function deleteItem(deleteId) {       
+      const response = fetch('/items/'+deleteId, {
+        method: 'DELETE'
+      });
+      response.then((data) => data.json()).then((result) => {
+        window.location.reload();
+      });
+     }
+  });
+  </script>
+</body>
+</html>
