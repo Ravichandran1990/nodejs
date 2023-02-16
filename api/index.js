@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 5000;
 mongoose.connect(mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => 
 {
     console.log("connected");
-    app.listen(5000);
+    app.listen(PORT);
 }).catch(err => {
     console.log(err);
 });

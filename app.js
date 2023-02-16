@@ -14,7 +14,6 @@ const Room = require('./models/rooms');
 const Message = require('./models/message');
 const {addUser,getUser,removeUser} = require('./helper')
 
-
 const app = express(); //136.226.252.244/32
 
 const routes = require('./routes/authRoutes');
@@ -29,9 +28,9 @@ const http = require('http').createServer(app);
 const socketio = require('socket.io'); 
 const io = socketio(http);
 
-
+const PORT = process.env.PORT || 5000;
 // const { MongoClient, ServerApiVersion } = require('mongodb');
-const mongodb = "mongodb+srv://test:test@cluster0.dtsmogk.mongodb.net/itemdb?retryWrites=true&w=majority";
+// const mongodb = "mongodb+srv://test:test@cluster0.dtsmogk.mongodb.net/itemdb?retryWrites=true&w=majority";
 // const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 // client.connect(err => {
 //     const collection = client.db("test").collection("devices");
@@ -39,11 +38,11 @@ const mongodb = "mongodb+srv://test:test@cluster0.dtsmogk.mongodb.net/itemdb?ret
 //     client.close();
 //   });
 mongoose.set('strictQuery', false);
-mongoose.connect(mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => 
+mongoose.connect(process.env.mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => 
 {
     console.log("connected");
     // app.listen(5000);
-    http.listen(5000);
+    http.listen(PORT);
 }).catch(err => {
     console.log(err);
 });
@@ -156,7 +155,7 @@ io.on('connection', (socket) => {
         });
     });
     socket.on('join', (addUserObj) => {
-        console.log(addUserObj);
+        //console.log(addUserObj);
         const {error, user} = addUser({...addUserObj,socket_id:socket.id});
         socket.join(addUserObj.room_id);
         if(error) {
