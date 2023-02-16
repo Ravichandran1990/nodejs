@@ -155,8 +155,9 @@ io.on('connection', (socket) => {
         });
     });
     socket.on('join', (addUserObj) => {
+        const obj = JSON.parse(addUserObj);
         //console.log(addUserObj);
-        const {error, user} = addUser({...addUserObj,socket_id:socket.id});
+        const {error, user} = addUser({...obj,socket_id:socket.id});
         socket.join(addUserObj.room_id);
         if(error) {
             console.log("Join Erro "+error);
