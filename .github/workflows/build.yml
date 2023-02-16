@@ -8,6 +8,6 @@ jobs:
       - run: npm --version
       - uses: actions/checkout@v3
       - run: npm install
-      - run: npm install -g nodemon
+      - run: npm install nodemon
       - run: nodemon app.js
       
