@@ -2,11 +2,16 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import { Server } from "socket.io";
+const io = new Server();
+
 //import Todo from './models/items.js';
 import router from './routes/todos.js';
 const app = express();
+
+
 dotenv.config();
-app.use(express.json({extended:true}));
+app.use(express.json({extended:true})); //pass the request to body json
 app.use(express.urlencoded({extended:true}));
 app.use(cors());
 app.use('/todos', router);
@@ -27,3 +32,14 @@ mongoose.connect(mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).t
 //         res.json(result)
 //     })
 // });
+io.on("connection", (socket) => {
+    console.log("Socket Connected to server "+socket.id);
+    // send a message to the client
+    socket.emit("hello from server", "Testing from Server");
+  
+    // receive a message from the client
+    socket.on("createRoom", (...args) => {
+       console.log(args);
+    });
+  });
+ 

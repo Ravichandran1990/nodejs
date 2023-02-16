@@ -1,10 +1,37 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const Item = require('./models/items')
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const corsOption = {
+    origin: "http://localhost:3000/",
+    credential: true,
+    optionSuccessStatus:200
+};
+
+const User = require('./models/user');
+const Item = require('./models/items');
+const Room = require('./models/rooms');
+const Message = require('./models/message');
+const {addUser,getUser,removeUser} = require('./helper')
+
+
 const app = express(); //136.226.252.244/32
+
+const routes = require('./routes/authRoutes');
+
+app.use(cors(corsOption));
+app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
+app.use(express.json({extended:true})); //pass the request to body json
+app.use(routes);
+
+const http = require('http').createServer(app);
+const socketio = require('socket.io'); 
+const io = socketio(http);
+
+
 // const { MongoClient, ServerApiVersion } = require('mongodb');
-const mongodb = "mongodb+srv://<username>:<password>@cluster0.dtsmogk.mongodb.net/itemdb?retryWrites=true&w=majority";
+const mongodb = "mongodb+srv://test:test@cluster0.dtsmogk.mongodb.net/itemdb?retryWrites=true&w=majority";
 // const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 // client.connect(err => {
 //     const collection = client.db("test").collection("devices");
@@ -15,10 +42,18 @@ mongoose.set('strictQuery', false);
 mongoose.connect(mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => 
 {
     console.log("connected");
-    app.listen(3000);
+    // app.listen(5000);
+    http.listen(5000);
 }).catch(err => {
     console.log(err);
 });
+//Setcookie
+app.get('/set-cookies', (req, res) => {
+    res.cookie('UserName', "Ravichandran");
+    res.cookie('isAuthendicated', true);
+    res.send("cookies set");
+})
+
 app.set('view engine', 'ejs')
 
 app.get('/create-item', (req,res) => {
@@ -90,3 +125,62 @@ app.use((req,res) => {
     // res.sendFile('./views/404.html', {root: __dirname})
     res.render('404');
 });
+
+//Socket Script
+io.on('connection', (socket) => {    
+    console.log('Socket Connected server side '+socket.id);
+    Room.find().then((result) => {
+        socket.emit("roomList", result);
+    });
+
+    // socket.on('verifyLogin', (obj, callback) => {
+    //     SignUp.findOne({email: obj.email}, (error, user) => {
+    //         console.log("Error "+error);
+    //     })
+    // });
+
+    // socket.on('signUpData', (signupObj, callback) => {
+    //     const data = new SignUp(signupObj);
+    //     data.save().then((result) => {
+    //         console.log("signUp "+result);
+    //         callback();
+    //     })
+    // });
+    
+    
+    socket.on('createRoom', name => {
+        console.log("The room name is" + name);
+        const createRoom = new Room({name});
+        createRoom.save().then(result => {
+            socket.emit("roomCreated", result);
+        });
+    });
+    socket.on('join', (addUserObj) => {
+        console.log(addUserObj);
+        const {error, user} = addUser({...addUserObj,socket_id:socket.id});
+        socket.join(addUserObj.room_id);
+        if(error) {
+            console.log("Join Erro "+error);
+        }else {
+            console.log("Join user "+ user);
+        }
+        console.log("Join Socket Id" +socket.id);
+    });
+    socket.on('sendmessage', (message, room_id, user_id, callback) => {
+        console.log("sendmessage Socket Id "+socket.id); 
+         const user = getUser(room_id, user_id);
+        // console.log("getUser Data "+user);
+        if(user) {
+         const mesgToClient = {...user,text:message};
+         const messageData = new Message(mesgToClient);
+         messageData.save().then((result) => {
+            io.to(room_id).emit('message', result);
+         })
+        }                  
+        callback();
+    });
+
+    socket.on('disconnect', () => {
+        const user = removeUser(socket.id);
+    })
+})
