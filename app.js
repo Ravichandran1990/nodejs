@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const corsOption = {
-    origin: "http://localhost:3000/",
+    origin: "https://react-production-c683.up.railway.app/",
     credential: true,
     optionSuccessStatus:200
 };
@@ -158,7 +158,7 @@ io.on('connection', (socket) => {
         const obj = JSON.parse(addUserObj);
         //console.log(addUserObj);
         const {error, user} = addUser({...obj,socket_id:socket.id});
-        socket.join(addUserObj.room_id);
+        socket.join(obj.room_id);
         if(error) {
             console.log("Join Erro "+error);
         }else {
