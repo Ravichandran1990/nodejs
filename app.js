@@ -30,7 +30,7 @@ const io = socketio(http);
 
 const PORT = process.env.PORT || 5000;
 // const { MongoClient, ServerApiVersion } = require('mongodb');
-// const mongodb = "mongodb+srv://test:test@cluster0.dtsmogk.mongodb.net/itemdb?retryWrites=true&w=majority";
+const mongodb = "mongodb+srv://test:test@cluster0.dtsmogk.mongodb.net/itemdb?retryWrites=true&w=majority";
 // const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 // client.connect(err => {
 //     const collection = client.db("test").collection("devices");
@@ -38,7 +38,7 @@ const PORT = process.env.PORT || 5000;
 //     client.close();
 //   });
 mongoose.set('strictQuery', false);
-mongoose.connect(process.env.mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => 
+mongoose.connect(mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => 
 {
     console.log("connected");
     // app.listen(5000);
