@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const corsOption = {
     origin: "https://react-production-c683.up.railway.app",
-    credential: true,
+    credentials: true,
     optionSuccessStatus:200
 };
 
