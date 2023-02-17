@@ -126,7 +126,7 @@ app.use((req,res) => {
 });
 
 //Socket Script
-io.on('connection', (socket) => {    
+io.on('connection', (socket) => {
     console.log('Socket Connected server side '+socket.id);
     Room.find().then((result) => {
         socket.emit("roomList", result);
@@ -158,7 +158,7 @@ io.on('connection', (socket) => {
         const obj = JSON.parse(addUserObj);
         //console.log(addUserObj);
         const {error, user} = addUser({...obj,socket_id:socket.id});
-        socket.join(obj.room_id);
+        //socket.join(obj.room_id);
         if(error) {
             console.log("Join Erro "+error);
         }else {
@@ -167,20 +167,22 @@ io.on('connection', (socket) => {
         console.log("Join Socket Id" +socket.id);
     });
     socket.on('sendmessage', (message, room_id, user_id, callback) => {
-        console.log("sendmessage Socket Id "+socket.id); 
+        console.log("sendmessage Socket Id read"+socket.id); 
          const user = getUser(room_id, user_id);
         // console.log("getUser Data "+user);
         if(user) {
          const mesgToClient = {...user,text:message};
          const messageData = new Message(mesgToClient);
          messageData.save().then((result) => {
-            io.to(room_id).emit('message', result);
+            // io.to(room_id).emit('message', result);
+            socket.emit('message', result);
          })
         }                  
         callback();
     });
 
     socket.on('disconnect', () => {
+        console.log("Disconnect "+socket.id);
         const user = removeUser(socket.id);
     })
 })
