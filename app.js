@@ -158,7 +158,7 @@ io.on('connection', (socket) => {
         const obj = JSON.parse(addUserObj);
         //console.log(addUserObj);
         const {error, user} = addUser({...obj,socket_id:socket.id});
-        //socket.join(obj.room_id);
+        socket.join(obj.room_id);
         if(error) {
             console.log("Join Erro "+error);
         }else {
@@ -174,8 +174,9 @@ io.on('connection', (socket) => {
          const mesgToClient = {...user,text:message};
          const messageData = new Message(mesgToClient);
          messageData.save().then((result) => {
-            // io.to(room_id).emit('message', result);
-            socket.emit('message', result);
+            io.to(room_id).emit('message', result);
+            console.log("Message saved " +result.text);
+            // socket.emit('message', result);
          })
         }                  
         callback();
