@@ -25,6 +25,14 @@ module.exports.signup = (req,res) => {
     })
      
 }
+module.exports.userlist = async (req,res) => {
+    const userlistData = await User.find();
+    try {
+        res.status(200).json({userlistData});
+    } catch (error) {
+        res.status(400).json({error});
+    }
+}
 module.exports.login = async (req,res) => {
     console.log(req.body);
     try{
@@ -56,11 +64,10 @@ module.exports.verifyUser = (req,res,next) => {
                 console.log("Verify User data "+decodedToken.id);
                 let user = await User.findById(decodedToken.id);
                 res.status(200).json({user});
-                 
             }
         })
     }else{
-        next();
+        res.status(200).json({error:"Token not valid"});
     }
 }
 module.exports.logout = (req,res) => {

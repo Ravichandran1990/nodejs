@@ -2,8 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const cron = require("node-cron");
 const corsOption = {
-    origin: "https://react-production-c683.up.railway.app",
+    origin: "http://localhost:3000",
     credentials: true,
     optionSuccessStatus:200
 };
@@ -46,6 +47,11 @@ mongoose.connect(mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).t
 }).catch(err => {
     console.log(err);
 });
+//Cron node for scheduler // 6 args and first one optinal "*/60 * * * * *" 
+// cron.schedule("* * * * *", function () {
+//     console.log("---------------------");
+//     console.log("running a task every 15 seconds" + new Date());
+// });
 //Setcookie
 app.get('/set-cookies', (req, res) => {
     res.cookie('UserName', "Ravichandran");
@@ -128,9 +134,7 @@ app.use((req,res) => {
 //Socket Script
 io.on('connection', (socket) => {
     console.log('Socket Connected server side '+socket.id);
-    Room.find().then((result) => {
-        socket.emit("roomList", result);
-    });
+    
 
     // socket.on('verifyLogin', (obj, callback) => {
     //     SignUp.findOne({email: obj.email}, (error, user) => {
@@ -147,6 +151,11 @@ io.on('connection', (socket) => {
     // });
     
     
+    socket.on('getroomList', name => {
+        Room.find().then((result) => {
+            socket.emit("roomList", result);
+        });
+    });
     socket.on('createRoom', name => {
         console.log("The room name is" + name);
         const createRoom = new Room({name});
@@ -167,6 +176,7 @@ io.on('connection', (socket) => {
         console.log("Join Socket Id" +socket.id);
     });
     socket.on('sendmessage', (message, room_id, user_id, callback) => {
+        console.log("########################"); 
         console.log("sendmessage Socket Id read"+socket.id); 
          const user = getUser(room_id, user_id);
         // console.log("getUser Data "+user);
